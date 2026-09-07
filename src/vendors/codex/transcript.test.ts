@@ -41,6 +41,21 @@ describe('codex transcript', () => {
     }
   })
 
+  it('flattens an array-shaped custom_tool_call_output into the action output', async () => {
+    const events = await readTranscript(
+      'test/fixtures/transcripts/codex-custom-tool-output-array.jsonl',
+    )
+
+    expect(events).toContainEqual({
+      kind: 'action',
+      tool: 'exec',
+      input: 'const r = await tools.exec_command(...)',
+      output:
+        'Script completed\nWall time 1.7 seconds\nOutput:\n\nF\n\nFailures:\n\n  1) expected output to include foo',
+      toolUseId: 'call_123',
+    })
+  })
+
   it('parses JSON-encoded function_call arguments into objects at the boundary', async () => {
     const events = await readTranscript(
       'test/fixtures/transcripts/codex-basic.jsonl',

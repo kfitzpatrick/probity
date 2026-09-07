@@ -42,12 +42,22 @@ const CustomToolCallSchema = z.object({
   }),
 })
 
+const CustomToolCallOutput = z.union([
+  z.string(),
+  z.array(z.unknown()).transform((blocks) =>
+    blocks
+      .map((block) => z.object({ text: z.string() }).safeParse(block))
+      .flatMap((parsed) => (parsed.success ? [parsed.data.text] : []))
+      .join('\n'),
+  ),
+])
+
 const CustomToolCallOutputSchema = z.object({
   type: z.literal('response_item'),
   payload: z.object({
     type: z.literal('custom_tool_call_output'),
     call_id: z.string(),
-    output: z.string(),
+    output: CustomToolCallOutput,
   }),
 })
 
