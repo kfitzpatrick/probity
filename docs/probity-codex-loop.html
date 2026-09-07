@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Probity and Codex integration loop</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: light-dark(#f7f8fa, #111318);
+      --surface: light-dark(#ffffff, #1b1f27);
+      --surface-strong: light-dark(#edf4ff, #17243a);
+      --text: light-dark(#18202b, #edf2f7);
+      --muted: light-dark(#5d6878, #aab4c3);
+      --line: light-dark(#7c8796, #8793a5);
+      --border: light-dark(#cad2de, #3c4657);
+      --link: light-dark(#075fc4, #72b7ff);
+      --allow: light-dark(#16784a, #59d79a);
+      --block: light-dark(#b13737, #ff8585);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 32px 20px 56px;
+      background: var(--bg);
+      color: var(--text);
+      font: 16px/1.45 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    main {
+      width: min(920px, 100%);
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      text-align: center;
+      font-size: clamp(24px, 4vw, 34px);
+    }
+
+    .subtitle {
+      margin: 0 0 28px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) minmax(260px, 1.35fr) minmax(180px, 1fr);
+      gap: 10px 24px;
+      align-items: center;
+    }
+
+    .node {
+      display: block;
+      padding: 13px 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+      color: var(--text);
+      text-align: center;
+      text-decoration: none;
+      box-shadow: 0 2px 8px light-dark(#18202b12, #00000033);
+    }
+
+    a.node:hover,
+    a.node:focus-visible {
+      border-color: var(--link);
+      color: var(--link);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .node code {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+      overflow-wrap: anywhere;
+    }
+
+    .node code.signature {
+      margin-top: 7px;
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .plain { cursor: default; }
+    .probity { background: var(--surface-strong); }
+    .main { grid-column: 2; }
+    .left { grid-column: 1; }
+    .right { grid-column: 3; }
+
+    .arrow {
+      grid-column: 2;
+      min-height: 27px;
+      display: grid;
+      place-items: center;
+      color: var(--line);
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .branch-row {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) minmax(260px, 1.35fr) minmax(180px, 1fr);
+      gap: 24px;
+      align-items: center;
+    }
+
+    .branch-label {
+      color: var(--muted);
+      text-align: center;
+      font-size: 13px;
+    }
+
+    .decision {
+      border-radius: 999px;
+      font-weight: 600;
+    }
+
+    .outcomes {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-top: 6px;
+    }
+
+    .outcome {
+      display: grid;
+      gap: 8px;
+      align-content: start;
+    }
+
+    .outcome-label {
+      text-align: center;
+      font-weight: 650;
+    }
+
+    .allow { color: var(--allow); }
+    .block { color: var(--block); }
+
+    .loopback {
+      grid-column: 1 / -1;
+      margin-top: 12px;
+      padding-top: 16px;
+      border-top: 1px dashed var(--border);
+      color: var(--muted);
+      text-align: center;
+    }
+
+    @media (max-width: 700px) {
+      body { padding-inline: 14px; }
+      .flow, .branch-row { display: flex; flex-direction: column; }
+      .node { width: 100%; }
+      .arrow { min-height: auto; }
+      .branch-label::before { content: "↳ "; }
+      .outcomes { grid-template-columns: 1fr; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Probity ↔ Codex</h1>
+    <p class="subtitle">Click any node with a source path to open that code.</p>
+
+    <section class="flow" aria-label="Probity and Codex integration flow">
+      <div class="node plain main">User asks Codex to change code</div>
+      <div class="arrow" aria-hidden="true">↓</div>
+      <div class="node plain main">Codex proposes a tool call</div>
+      <div class="arrow" aria-hidden="true">↓</div>
+
+      <a class="node main probity" href="setup.md#L50">
+        PreToolUse hook
+        <code class="signature">npx @nizos/probity --agent codex</code>
+        <code>docs/setup.md:50</code>
+      </a>
+      <div class="arrow" aria-hidden="true">↓</div>
+
+      <a class="node main probity" href="../src/bin.ts#L70">
+        CLI entry point
+        <code class="signature">main(args: MainArgs): Promise&lt;MainResult&gt;</code>
+        <code>src/bin.ts:70</code>
+      </a>
+      <div class="arrow" aria-hidden="true">↓</div>
+
+      <a class="node main probity" href="../src/cli.ts#L48">
+        Parse and dispatch payload
+        <code class="signature">dispatch(entry, rawPayload, rules, agent): Promise&lt;RunResult&gt;</code>
+        <code>src/cli.ts:48</code>
+      </a>
+      <div class="arrow" aria-hidden="true">↓</div>
+
+      <a class="node main probity" href="../src/vendors/codex/adapter.ts#L88">
+        Normalize into command or write actions
+        <code class="signature">parseAction(payload): Promise&lt;ParseActionResult&gt;</code>
+        <code>src/vendors/codex/adapter.ts:88</code>
+      </a>
+      <div class="arrow" aria-hidden="true">↓</div>
+
+      <div class="branch-row">
+        <a class="node" href="../src/vendors/codex/transcript.ts#L54">
+          Read recent session history
+          <code class="signature">readTranscript(path, options?): Promise&lt;RawSessionEvent[]&gt;</code>
+          <code>src/vendors/codex/transcript.ts:54</code>
+        </a>
+        <a class="node probity" href="../src/engine.ts#L32">
+          Evaluate matching rules
+          <code class="signature">evaluate(action, entries, ctx?, hooks?): Promise&lt;Outcome&gt;</code>
+          <code>src/engine.ts:32</code>
+        </a>
+        <a class="node" href="../src/vendors/codex/agent.ts#L18">
+          Optional read-only Codex validator
+          <code class="signature">codex(deps?): Agent</code>
+          <code>src/vendors/codex/agent.ts:18</code>
+        </a>
+      </div>
+      <div class="branch-row" aria-hidden="true">
+        <div class="branch-label">history →</div>
+        <div class="arrow">↓</div>
+        <div class="branch-label">← pass or violation</div>
+      </div>
+
+      <div class="node plain main decision">Decision</div>
+      <div class="arrow" aria-hidden="true">↓</div>
+
+      <a class="node main probity" href="../src/vendors/codex/adapter.ts#L99">
+        Format Codex response
+        <code class="signature">toResponse(decision: Decision): string</code>
+        <code>src/vendors/codex/adapter.ts:99</code>
+      </a>
+
+      <div class="outcomes">
+        <div class="outcome">
+          <div class="outcome-label allow">Allow</div>
+          <div class="node plain">Codex executes the tool</div>
+          <div class="node plain">Result enters the transcript</div>
+        </div>
+        <div class="outcome">
+          <div class="outcome-label block">Block + reason</div>
+          <div class="node plain">Codex receives Probity feedback</div>
+          <div class="node plain">Codex revises the action</div>
+        </div>
+      </div>
+
+      <div class="loopback">↺ Both paths return to “Codex proposes a tool call”</div>
+    </section>
+  </main>
+</body>
+</html>
