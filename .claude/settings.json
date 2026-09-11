@@ -13,11 +13,6 @@
     ]
   },
   "permissions": {
-    "deny": [
-      "Edit(**/probity.config.ts)",
-      "Write(**/probity.config.ts)",
-      "Edit(**/.claude/settings*.json)",
-      "Write(**/.claude/settings*.json)"
-    ]
+    "deny": ["Edit(**/probity.config.ts)", "Edit(**/.claude/settings*.json)"]
   }
 }

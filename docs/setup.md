@@ -49,14 +49,7 @@ Further reading: [Claude Code's hooks documentation](https://code.claude.com/doc
 
 ## OpenAI Codex
 
-Codex hooks are gated behind a feature flag. Enable it in `~/.codex/config.toml`:
-
-```toml
-[features]
-codex_hooks = true
-```
-
-Then add a `PreToolUse` hook in `~/.codex/hooks.json`:
+Codex hooks are enabled by default. Add a `PreToolUse` hook in `~/.codex/hooks.json`:
 
 ```json
 {
