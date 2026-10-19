@@ -1,13 +1,9 @@
 {
-  "name": "@nizos/probity",
-  "version": "1.10.1",
+  "name": "@kfitzpatrick/probity",
+  "version": "1.10.1-kfitzpatrick.1",
   "description": "TDD enforcement and guardrails for Claude Code, Codex, and GitHub Copilot CLI.",
   "license": "MIT",
   "author": "Nizar Selander",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/nizos/probity.git"
-  },
   "bugs": "https://github.com/nizos/probity/issues",
   "homepage": "https://github.com/nizos/probity#readme",
   "keywords": [
@@ -117,5 +113,10 @@
     "jiti": "^2.6.1",
     "picomatch": "^4.0.4",
     "zod": "^4.3.6"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted",
+    "tag": "internal"
   }
 }

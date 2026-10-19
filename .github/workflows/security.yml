@@ -2,9 +2,9 @@ name: Security
 
 on:
   push:
-    branches: [main]
+    branches: [main, 'internal/probity']
   pull_request:
-    branches: [main]
+    branches: [main, 'internal/probity']
   schedule:
     # Run security scans every Monday at 09:00 UTC
     - cron: '0 9 * * 1'

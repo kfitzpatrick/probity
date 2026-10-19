@@ -2,9 +2,12 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, 'internal/probity']
   pull_request:
-    branches: [main]
+    branches: [main, 'internal/probity']
+
+permissions:
+  contents: read
 
 jobs:
   check:

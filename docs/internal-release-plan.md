@@ -1,10 +1,28 @@
 # Issue #7: Private internal Probity release plan
 
-Status: planning only; implementation requires Kevin's approval.
+Status: implementation approved on 2026-10-19; preparing an unpublished release.
 
 Issue: https://github.com/kfitzpatrick/probity/issues/7
 
 Consumer issue: https://github.com/kfitzpatrick/spec-split-audit/issues/38
+
+## Approved execution decisions (2026-10-19)
+
+- Reuse `/Users/kevin.fitzpatrick/werk/probity.internal-probity` on
+  `internal/probity`, initially clean at `0ace932`.
+- Upstream baseline and unchanged local `main`:
+  `f9758ce9f8ea621e7004e92e60e748ee62e5f25c`.
+- Kevin approved the Codex SDK and bundled CLI update to `0.163.0`.
+  Integrate `beca58b` and `5d8399d` from `codex/issue-87-upstream`, retaining
+  the committed plan (`323b8c1`) and manual publisher (`0ace932`). Older
+  text-block, array-output, and Copilot argument fixes are already upstream.
+- Package: `@kfitzpatrick/probity@1.10.1-kfitzpatrick.1`, registry
+  `https://npm.pkg.github.com`, tag `internal`.
+- Keep the upstream `@nizos/probity` development dependency for repository
+  dogfooding/tests. It is not a runtime dependency of the internal package.
+- See [the release runbook](internal-release.md) for manual checkpoints.
+  The final artifact record is generated alongside the retained tarball in
+  ignored `releases/1.10.1-kfitzpatrick.1/` after committing and validating.
 
 ## Objective and boundaries
 
@@ -70,10 +88,10 @@ explicitly recorded.
 
 Dependencies: implementation approval. Can run alongside work section 1.
 
-| Subagent | Model | Effort | Focus and deliverable |
-| --- | --- | --- | --- |
+| Subagent        | Model        | Effort | Focus and deliverable                                                                                                                                                  |
+| --------------- | ------------ | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Patch inventory | `gpt-6-luna` | medium | Compare upstream and fork branches; identify candidate custom commits, dependencies, and selection ambiguities. Return a recommended baseline and explicit patch list. |
-| Packaging audit | `gpt-6-luna` | medium | Inspect CLI, exports, compiled files, lockfile, license, and workflows. Return required changes and concrete verification commands. |
+| Packaging audit | `gpt-6-luna` | medium | Inspect CLI, exports, compiled files, lockfile, license, and workflows. Return required changes and concrete verification commands.                                    |
 
 These bounded inspections use the least expensive suitable model. Give each
 agent focused context rather than a full-history fork. The primary agent checks
