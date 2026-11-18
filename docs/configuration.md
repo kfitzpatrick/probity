@@ -1,6 +1,6 @@
 # Configuration
 
-Probity loads its config from a `probity.config` file in your project. The file declares the active rules and, optionally, overrides the AI validator.
+Probity loads its config from a `probity.config` file in your project. The file declares the active rules and can configure the AI validator.
 
 ## File location
 
@@ -27,11 +27,31 @@ Globs inside a `files` array are anchored against the config file's directory, s
 
 See [Rules](rules.md) for the built-in catalog.
 
+## Codex validator model
+
+Set `validatorOptions.codex.model` to choose the model for the built-in Codex validator.
+
+```ts
+// probity.config.ts
+import { defineConfig, enforceTdd } from '@kfitzpatrick/probity'
+
+export default defineConfig({
+  rules: [enforceTdd()],
+  validatorOptions: {
+    codex: { model: 'your-model-id' },
+  },
+})
+```
+
+The `--agent` flag selects the host adapter and its built-in validator. Probity reads `validatorOptions.codex` only for the built-in validator selected by `--agent codex`. The host Codex session uses its own model.
+
+If you omit the model, the Codex SDK chooses its default. If the built-in Codex validator receives an empty or whitespace-only model, Probity blocks the request before it starts a validator session.
+
 ## The `ai` override
 
-Probity's default AI validator pairs with the agent selected by `--agent` (e.g. the Claude Agent SDK for `claude-code`) and piggybacks on the user's logged-in session. To use a different model or provider, set `ai` on the config; the value must implement `{ reason: (prompt: string) => Promise<Verdict> }`.
+Set `ai` in the config to use a custom validator. The value must implement `{ reason: (prompt: string) => Promise<Verdict> }`.
 
-The host coding agent itself is selected by the `--agent` CLI flag, not by the config — that keeps the same config portable across vendors.
+If you set `ai`, Probity uses the custom validator and skips the built-in validator options. The `--agent` flag still selects the host adapter.
 
 ## Overriding the file location
 
