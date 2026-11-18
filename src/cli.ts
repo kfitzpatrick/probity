@@ -41,7 +41,11 @@ export async function run(
 ): Promise<RunResult> {
   const entry = vendors[options.vendor]
   const config = await (options.loadConfig ?? defaultConfigLoader)()
-  const agent = config.ai ?? entry.agent()
+  const agent =
+    config.ai ??
+    (options.vendor === 'codex'
+      ? vendors.codex.agent(config.validatorOptions?.codex)
+      : entry.agent())
   return dispatch(entry, rawPayload, config.rules, agent)
 }
 

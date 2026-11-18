@@ -15,12 +15,19 @@ type CodexLike = {
   }
 }
 
-export function codex(deps: { codex?: CodexLike } = {}): Agent {
+export function codex(deps: { codex?: CodexLike; model?: string } = {}): Agent {
+  const { model } = deps
   return {
     reason: (prompt) =>
       toVerdict(async () => {
+        if (model?.trim() === '') {
+          throw new Error(
+            'validatorOptions.codex.model must be a nonblank string',
+          )
+        }
         const instance = deps.codex ?? (await loadDefaultCodex())
         const thread = instance.startThread({
+          ...(model !== undefined && { model }),
           skipGitRepoCheck: true,
           sandboxMode: 'read-only',
           approvalPolicy: 'never',

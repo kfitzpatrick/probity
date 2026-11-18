@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 
-import { describe, it, expect } from 'vitest'
+import { beforeEach, describe, it, expect, vi } from 'vitest'
 
 import { failClosedResponse, run, type RunResult, type Vendor } from './cli.js'
 import type { Config } from './config.js'
@@ -16,7 +16,148 @@ const stubAgent: Agent = {
   reason: () => Promise.resolve({ kind: 'pass', reason: '' }),
 }
 
+const { startThread, query } = vi.hoisted(() => ({
+  startThread: vi.fn(() => ({
+    run: () =>
+      Promise.resolve({ finalResponse: '{"kind":"pass","reason":""}' }),
+  })),
+  query: vi.fn(function* () {
+    yield {
+      type: 'result',
+      subtype: 'success',
+      result: '{"kind":"pass","reason":""}',
+    }
+  }),
+}))
+
+vi.mock('@anthropic-ai/claude-agent-sdk', () => ({ query }))
+
+vi.mock('@openai/codex-sdk', () => ({
+  Codex: class {
+    startThread = startThread
+  },
+}))
+
+const validatorRule: Rule = async (_action, ctx) =>
+  (await ctx?.agent?.reason('rule prompt')) ?? { kind: 'pass' }
+
 describe('cli', () => {
+  beforeEach(() => {
+    startThread.mockClear()
+    query.mockClear()
+  })
+
+  it('requests the configured Codex model at the SDK boundary', async () => {
+    await setup({
+      vendor: 'codex',
+      fixture: 'pre-bash-pwd.json',
+      config: {
+        rules: [validatorRule],
+        validatorOptions: { codex: { model: 'test-validator-model' } },
+      },
+    })
+
+    expect(startThread).toHaveBeenCalledWith(
+      expect.objectContaining({ model: 'test-validator-model' }),
+    )
+  })
+
+  it.each([
+    ['no validator options', {}],
+    ['empty Codex options', { validatorOptions: { codex: {} } }],
+  ] as const)('uses SDK defaults with %s', async (_label, options) => {
+    await setup({
+      vendor: 'codex',
+      fixture: 'pre-bash-pwd.json',
+      config: { rules: [validatorRule], ...options },
+    })
+
+    expect(startThread.mock.calls).toStrictEqual([
+      [
+        {
+          skipGitRepoCheck: true,
+          sandboxMode: 'read-only',
+          approvalPolicy: 'never',
+          networkAccessEnabled: false,
+          webSearchEnabled: false,
+        },
+      ],
+    ])
+  })
+
+  it.each(['', ' \t '])('blocks a blank Codex model (%j)', async (model) => {
+    const { response } = await setup({
+      vendor: 'codex',
+      fixture: 'pre-bash-pwd.json',
+      config: {
+        rules: [validatorRule],
+        validatorOptions: { codex: { model } },
+      },
+    })
+
+    const parsed = parseAs<{
+      decision?: string
+      reason?: string
+    }>(response || '{}')
+    expect(parsed.decision).toBe('block')
+    expect(parsed.reason).toContain('validatorOptions.codex.model')
+    expect(startThread).not.toHaveBeenCalled()
+  })
+
+  it.each(['test-validator-model', ''])(
+    'uses the default Claude Code validator with Codex model %j',
+    async (model) => {
+      const { response } = await setup({
+        fixture: 'write-kebab-case.json',
+        config: {
+          rules: [validatorRule],
+          validatorOptions: { codex: { model } },
+        },
+      })
+
+      expect(response).toBe('')
+      expect(query).toHaveBeenCalledWith({
+        prompt: 'rule prompt',
+        options: {
+          maxTurns: 1,
+          thinking: { type: 'disabled' },
+          permissionMode: 'dontAsk',
+          tools: [],
+          settings: { autoMemoryEnabled: false },
+          settingSources: [],
+          persistSession: false,
+        },
+      })
+      expect(startThread).not.toHaveBeenCalled()
+    },
+  )
+
+  it.each(['test-validator-model', ''])(
+    'uses custom ai with Codex model %j and returns the Codex hook response',
+    async (model) => {
+      const reason = vi.fn<Agent['reason']>().mockResolvedValue({
+        kind: 'violation',
+        reason: 'custom decision',
+      })
+      const { response } = await setup({
+        vendor: 'codex',
+        fixture: 'pre-bash-pwd.json',
+        config: {
+          rules: [validatorRule],
+          ai: { reason },
+          validatorOptions: { codex: { model } },
+        },
+      })
+
+      expect(reason).toHaveBeenCalledWith('rule prompt')
+      expect(JSON.parse(response)).toMatchObject({
+        decision: 'block',
+        reason: 'Probity: custom decision',
+      })
+      expect(startThread).not.toHaveBeenCalled()
+    },
+  )
+
   it('denies a write whose filename violates kebab-case', async () => {
     const { response } = await setup({ fixture: 'write-new-file.json' })
     const parsed = parseAs<ClaudeCodeResponse>(response)
