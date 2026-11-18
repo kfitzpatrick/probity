@@ -41,10 +41,15 @@ export type RuleEntry = Rule | RuleBlock
  *   piggybacks on the user's logged-in session. The field is named
  *   `ai` (not `agent`) to disambiguate from `--agent <vendor>`, which
  *   selects the host coding agent.
+ * - `validatorOptions` — optional configuration for built-in validators.
+ *   `codex.model` sets the model for the built-in Codex validator.
  */
 export type Config = {
   rules: readonly RuleEntry[]
   ai?: Agent
+  validatorOptions?: {
+    codex?: { model?: string }
+  }
 }
 
 /**
