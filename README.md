@@ -1,6 +1,6 @@
 # Probity — internal build
 
-**Internal package:** `@kfitzpatrick/probity@1.10.1-kfitzpatrick.1`
+**Internal package:** `@kfitzpatrick/probity@1.10.1-kfitzpatrick.3`
 **Registry:** GitHub Packages (`https://npm.pkg.github.com`)
 **Visibility:** intended to be private; verify package access settings after first publication.
 
@@ -44,7 +44,7 @@ registry=https://registry.npmjs.org/
 Provide `NODE_AUTH_TOKEN` through your secret store using a classic GitHub PAT with `read:packages`. Do not commit the token or place it directly in `.npmrc`. Then install the exact version:
 
 ```bash
-npm install --save-dev --save-exact @kfitzpatrick/probity@1.10.1-kfitzpatrick.1
+npm install --save-dev --save-exact @kfitzpatrick/probity@1.10.1-kfitzpatrick.3
 ```
 
 Create `probity.config.ts` at your project root:
